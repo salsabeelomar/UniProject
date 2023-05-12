@@ -1,9 +1,11 @@
-const cartFav = require("./cartFavSchema");
-const userSchema = require("./userSchema");
-const productSchema = require("./productSchema");
+const cartSchema = require("./cart.schema");
+const favoriteSchema = require("./favorite.schema");
+const userSchema = require("./user.schema");
+const productSchema = require("./product.schema");
 
 module.export = {
-  cartFav,
+  cartSchema,
+  favoriteSchema,
   userSchema,
   productSchema,
 };

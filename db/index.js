@@ -1,24 +1,22 @@
 const { MongoClient } = require("mongodb");
 class DbConnection {
-  database;
-  #allCollections = ["users", "products", "favorite", "carts"];
   constructor() {
     this.#setupCollection();
   }
-
-  connectDb() {
-    try {
-      const connection = new MongoClient(process.env.DATABASE_URL);
-      this.database = connection.db("Brand");
-    } catch (err) {
-      console.log(err);
-    }
+  connectDB(cb) {
+    MongoClient.connect(process.env.DATABASE_URL)
+      .then(async (client) => {
+        const database = client.db("Brand");
+        await cb(database);
+        client.close();
+      })
+      .catch((err) => console.log(err));
   }
 
-  async #setupCollection() {
-    try {
-      this.connectDb();
-      const collections = await this.database.listCollections().toArray();
+  #allCollections = ["users", "products", "favorites", "carts"];
+  #setupCollection() {
+    this.connectDB(async (database) => {
+      const collections = await database.listCollections().toArray();
       if (collections.length < 4) {
         collections.map((ele) => {
           if (this.#allCollections.includes(ele.name))
@@ -26,22 +24,14 @@ class DbConnection {
               this.#allCollections.indexOf(ele.name),
               1
             );
+          return ele;
         });
-        this.#allCollections.map((ele) => {
-          this.database
-            .createCollection(ele)
-            .then((data) => {
-              console.log(data);
-            })
-            .catch((err) => {
-              console.log(err);
-            });
-        });
+        this.#allCollections.forEach((ele) =>
+          this.connectDB((database) => database.createCollection(ele))
+        );
       }
-    } catch (e) {
-      console.log(e);
-    }
+    });
   }
 }
-const { database } = new DbConnection();
-module.exports = database;
+const dbConnection = new DbConnection();
+module.exports = dbConnection;
