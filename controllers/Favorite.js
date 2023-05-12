@@ -1,8 +1,8 @@
 class Favorite {
-  async addToFavorite(data) {}
-  async updateFavoriteItems(data) {}
-  async removeFavoriteItems(data) {}
+  async addToFavorite(req, res) {}
+  async updateFavoriteItems(req, res) {}
+  async removeFavoriteItems(req, res) {}
 }
 
 const favorite = new Favorite();
-module.export = favorite;
+module.exports = favorite;

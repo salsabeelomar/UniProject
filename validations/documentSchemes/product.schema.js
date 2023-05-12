@@ -1,8 +1,8 @@
 const productSchema = {
-    validator: {
-      $jsonSchema: {
-        bsonType: "object",
-      },
+  collMod: "products",
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
       required: [
         "_id",
         "vendorId",
@@ -16,6 +16,7 @@ const productSchema = {
         _id: {
           bsonType: "objectId",
           description: "must be a objectId and is required",
+          uniqueItems: true,
         },
         vendorId: {
           bsonType: "objectId",
@@ -46,11 +47,10 @@ const productSchema = {
           description: "images not array",
         },
       },
-      validationAction: "error",
-      uniqueItems: ["_id"],
-      validationLevel: "strict",
+      additionalProperties: false,
     },
-  };
-  
-  module.export = productSchema;
-  
+  },
+  validationLevel: "strict",
+  validationAction: "error",
+};
+module.exports = productSchema;

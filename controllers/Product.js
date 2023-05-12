@@ -1,8 +1,7 @@
 class Product {
-  async addProduct(data) {}
-  async updateProduct(data) {}
-  async getProducts(data) {}
+  async addProduct(req, res) {}
+  async updateProduct(req, res) {}
+  async getProducts(req, res) {}
 }
 
-const product = new Product();
-module.export = Product;
+module.exports = Product;

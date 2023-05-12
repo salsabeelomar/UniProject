@@ -1,15 +1,17 @@
 const express = require("express");
-require("dotenv").config();
 const compression = require("compression");
 const cors = require("cors");
+require("dotenv").config();
 const cookieParser = require("cookie-parser");
+const router = require("./routers");
 
 class App {
+  app;
   constructor() {
-    this.app = express();
     this.#initMiddleware();
   }
   #initMiddleware() {
+    this.app = express();
     this.app.use([
       cors(),
       compression(),
@@ -17,7 +19,9 @@ class App {
       express.json(),
       cookieParser(),
     ]);
+    this.app.use("/api/v1", router);
   }
 }
+
 const { app } = new App();
-module.export = app;
+module.exports = app;

@@ -1,9 +1,8 @@
 class Cart {
-    async addToCart(data) {}
-    async updateCartItems(data) {}
-    async removeCartItems(data) {}
-  }
-  
-  const cart = new Cart();
-  module.export = cart;
-  
+  async addToCart(req, res) {}
+  async updateCartItems(req, res) {}
+  async removeCartItems(req, res) {}
+}
+
+const cart = new Cart();
+module.exports = cart;
