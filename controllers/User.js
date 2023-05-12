@@ -1,7 +1,7 @@
 class User {
-  #generateToken(data) {}
-  async signUp(data) {}
-  async signIn(data) {}
+  #generateToken(req, res) {}
+  async signUp(req, resta) {}
+  async signIn(req, res) {}
 }
 
 const user = new User();
