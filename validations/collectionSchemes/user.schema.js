@@ -32,4 +32,4 @@ const userSchema = {
   validationLevel: "strict",
   validationAction: "error",
 };
-module.export = userSchema;
+module.exports = userSchema;
