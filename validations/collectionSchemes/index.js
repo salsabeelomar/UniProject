@@ -3,7 +3,7 @@ const favoriteSchema = require("./favorite.schema");
 const userSchema = require("./user.schema");
 const productSchema = require("./product.schema");
 
-module.export = {
+module.exports = {
   cartSchema,
   favoriteSchema,
   userSchema,

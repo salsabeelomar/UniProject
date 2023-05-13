@@ -43,4 +43,4 @@ const cartSchema = {
     },
   },
 };
-module.export = cartSchema;
+module.exports = cartSchema;

@@ -15,6 +15,7 @@ const favoriteSchema = {
         userId: {
           bsonType: "objectId",
           description: "must be a string and is required",
+          uniqueItems: true,
         },
         favoriteItems: {
           bsonType: "array",
