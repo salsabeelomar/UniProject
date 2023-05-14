@@ -4,11 +4,12 @@ class DbConnection {
     this.#setupCollection();
   }
   connectDB(cb) {
-    MongoClient.connect(process.env.DATABASE_URL)
+    return MongoClient.connect(process.env.DATABASE_URL)
       .then(async (client) => {
         const database = client.db("Brand");
-        await cb(database);
+        const result = await cb(database);
         client.close();
+        return result;
       })
       .catch((err) => console.log(err));
   }
