@@ -40,32 +40,33 @@ class User {
   }
 
   async signUp(req, res) {
+    const { name, email, password } = req.body;
+
     const addCb = async (database) => {
       try {
-        const { name, email, password } = req.body;
-
         const existingUser = await database.collection("users").findOne({
-          name,
+          email,
         });
         if (existingUser) {
-          throw new Error("Username is already taken");
+          throw new Error("Email is already taken");
         }
         const hashedPassword = await bcrypt.hash(password, 10);
         const user = {
           name,
           email,
-          password: hashedPassword,
         };
-        await database.collection("users").insertOne(user);
+        await database
+          .collection("users")
+          .insertOne({ ...user, password: hashedPassword });
         res.send({
           statusCode: 200,
           user: {
             name,
             email,
+            token: User.generateToken(user),
           },
         });
       } catch (error) {
-        console.log(error);
         res.send({
           statusCode: 400,
           message: "User is already exists",
@@ -80,6 +81,7 @@ class User {
       try {
         const { email, password } = req.body;
         const user = await database.collection("users").findOne({ email });
+
         if (!user) {
           throw new Error("User not found");
         }

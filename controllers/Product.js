@@ -1,4 +1,3 @@
-const { ObjectId } = require("mongodb");
 const dbConnection = require("../db");
 const { productSchema } = require("../validations/collectionSchemes");
 class Product {
@@ -9,17 +8,17 @@ class Product {
     await database.command(productSchema);
   }
   async addProduct(req, res) {
+    const { name, description, stock, price, size, images } = req.body;
     const addCb = async (database) => {
       try {
-        // const data = req.body;
         const productItem = await database.collection("products").insertOne({
-          vendorId: new ObjectId("64569f28585e9e4efb795f8d"),
-          name: "Tshirt",
-          description: "kkkkkkk",
-          stock: 15,
-          price: 150,
-          size: ["m", "l"],
-          images: ["imaage.png"],
+          vendorId: req.user._id,
+          name,
+          description,
+          stock,
+          price,
+          size,
+          images,
         });
         console.log(productItem);
         res.json({ productItem });
@@ -31,19 +30,19 @@ class Product {
     };
     dbConnection.connectDB(addCb);
   }
-   async updateProduct(req, res) {
-    const addCb = async (database)=>{
+  async updateProduct(req, res) {
+    const { _id, name, description } = req.body;
+    const addCb = async (database) => {
       try {
         const productItem = await database.collection("products").updateOne(
-          { _id: new ObjectId("645f7395244439d6c7c68322")},
+          { _id },
           {
             $set: {
-              name: "Red T-shirt",
-              description: "High High quality",
+              name,
+              description,
             },
           }
         );
-        console.log(productItem);
         res.json({ productItem });
       } catch (error) {
         // if (error.code==121)
@@ -51,13 +50,15 @@ class Product {
         res.json(error);
       }
     };
-     dbConnection.connectDB(addCb);
+    dbConnection.connectDB(addCb);
   }
   async getProducts(req, res) {
     const addCb = async (database) => {
       try {
-        const productItem = await database.collection("products").find({}).toArray();
-        console.log(productItem);
+        const productItem = await database
+          .collection("products")
+          .find({})
+          .toArray();
         res.json({ productItem });
       } catch (error) {
         // if (error.code==121)
