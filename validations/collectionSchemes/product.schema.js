@@ -46,6 +46,19 @@ const productSchema = {
           bsonType: "array",
           description: "images not array",
         },
+        code: {
+          bsonType: "string",
+          description: "code is required",
+          uniqueItems: true,
+        },
+        category: {
+          bsonType: "string",
+          description: "type not string",
+        },
+        brand: {
+          bsonType: "string",
+          description: "type not string",
+        },
       },
       additionalProperties: false,
     },

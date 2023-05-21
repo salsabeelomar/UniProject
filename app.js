@@ -21,7 +21,7 @@ class App {
       cookieParser(),
     ]);
     this.app.use("/api/v1", router);
-    this.app.use((req, res, next, err) => {
+    this.app.use(() => {
       throw new CustomError(500, "Internal");
     });
   }
