@@ -5,7 +5,6 @@ require("dotenv").config();
 const cookieParser = require("cookie-parser");
 const router = require("./routers");
 
-
 class App {
   app;
   constructor() {
@@ -21,6 +20,10 @@ class App {
       cookieParser(),
     ]);
     this.app.use("/api/v1", router);
+    this.app.use((err, req, res) => {
+      console.log("Exption");
+      res.status(err.status ?? 500).json({ msg: err.message });
+    });
   }
 }
 

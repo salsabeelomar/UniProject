@@ -1,4 +1,5 @@
 const { MongoClient } = require("mongodb");
+const CustomError = require("../helpers/CustomError");
 class DbConnection {
   constructor() {
     this.#setupCollection();
@@ -11,7 +12,9 @@ class DbConnection {
         client.close();
         return result;
       })
-      .catch((err) => console.log(err));
+      .catch((err) => {
+        return new CustomError(err);
+      });
   }
 
   #allCollections = ["users", "products", "favorites", "carts"];

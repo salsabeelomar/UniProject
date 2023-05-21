@@ -1,6 +1,5 @@
 const dbConnection = require("../db");
 const CustomError = require("../helpers/CustomError");
-const productModel = require("../models/Product");
 const { productSchema } = require("../validations/collectionSchemes");
 class Product {
   constructor() {
@@ -9,22 +8,34 @@ class Product {
   async #addProductSchema(database) {
     await database.command(productSchema);
   }
-  async addProduct(req, res, next) {
-    const { name, description, stock, price, size, images } = req.body;
-
-    productModel
-      .addProduct(
-        { name, description, stock, price, size, images },
-        req.user._id
-      )
-      .then((data) => {
-        res.json(data);
-      })
-      .catch((err) => {
-        next(new CustomError(500, err.message && "Internal Server Error"));
-      });
+  async addProduct(productItem, vendorId) {
+    return dbConnection.connectDB(async (database) => {
+      try {
+        const newProduct = await database.collection("products").insertOne({
+          vendorId,
+          ...productItem,
+        });
+        console.log("newProduct", newProduct);
+        return {
+          statusCode: 201,
+          data: {
+            product: { id: newProduct.insertedId, ...productItem },
+          },
+        };
+      } catch (error) {
+        console.log(
+          error.errInfo.details.schemaRulesNotSatisfied[0].missingProperties
+        );
+        if (error.code === 121)
+          return new CustomError(
+            121,
+            ` DB Error is missing ${error.errInfo.details.schemaRulesNotSatisfied[0].missingProperties}`
+          );
+        //   return error.errInfo.details.schemaRulesNotSatisfied;
+        // throw new CustomError(500, " Internal Server Error");
+      }
+    });
   }
-
   async updateProduct(req, res) {
     const { _id, name, description } = req.body;
     const addCb = async (database) => {
@@ -65,5 +76,5 @@ class Product {
   }
 }
 
-const product = new Product();
-module.exports = product;
+const productModel = new Product();
+module.exports = productModel;
