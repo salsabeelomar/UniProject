@@ -1,4 +1,5 @@
 const favoriteModel = require("../models/Favorite");
+
 class Favorite {
   async getFavoriteItems(req, res, next) {
     favoriteModel
