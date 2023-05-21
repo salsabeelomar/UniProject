@@ -4,7 +4,7 @@ const cors = require("cors");
 require("dotenv").config();
 const cookieParser = require("cookie-parser");
 const router = require("./routers");
-
+const CustomError = require("./helpers/CustomError");
 
 class App {
   app;
@@ -21,6 +21,9 @@ class App {
       cookieParser(),
     ]);
     this.app.use("/api/v1", router);
+    this.app.use(() => {
+      throw new CustomError(500, "Internal");
+    });
   }
 }
 
