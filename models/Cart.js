@@ -18,7 +18,6 @@ class Cart {
           .find({ userId })
           .toArray();
         const cart = [];
-
         for (let i = 0; i < cartItems[0].cartItems.length; i++) {
           const item = await productModel.getProductById(
             cartItems[0].favoriteItems[i]
@@ -34,69 +33,71 @@ class Cart {
       }
     });
   }
-  async addToCart(req, res) {
-    const addCb = async (database) => {
+  async addToCart(userId, cartItem) {
+    return dbConnection.connectDB(async (database) => {
       try {
-        const cartItems = await database.collection("carts").insertOne({
-          userId: new ObjectId("64569f28585e9e55fb795f8d"),
-          cartItems: [
+        const user = await database.collection("carts").findOne({ userId });
+        const carPro = await productModel.getProductById(
+          new ObjectId(cartItem.productId)
+        );
+        if (!user && carPro) {
+          await database.collection("carts").insertOne({
+            userId,
+            cartItems: [
+              {
+                ...cartItem,
+                productId: new ObjectId(cartItem.productId),
+              },
+            ],
+          });
+        } else if (carPro) {
+          await database.collection("carts").updateOne(
+            { userId },
             {
-              productId: new ObjectId("645d0f1ba31fa452093a5fa8"),
-              quantity: 3,
-              price: 100,
-            },
-          ],
-        });
-        console.log(cartItems);
-        res.json({ cartItems });
-      } catch (error) {
-        // if (error.code==121)
-        console.log(error);
-        res.json(error);
-      }
-    };
-    dbConnection.connectDB(addCb);
-  }
-  async updateCartItems(req, res) {
-    const addCb = async (database) => {
-      try {
-        const cartItems = await database.collection("carts").updateOne(
-          { _id: new ObjectId("645fcc9eec0cbbc36aa45bee") },
-          {
-            $set: {
-              cartItems: [
-                {
-                  productId: new ObjectId("645d0f1ba31fa452093a5fa8"),
-                  quantity: 7,
-                  price: 700,
+              $push: {
+                cartItems: {
+                  ...cartItem,
+                  productId: new ObjectId(cartItem.productId),
                 },
-              ],
+              },
+            }
+          );
+        }
+        return {
+          statusCode: 201,
+          message: "Product added From cart List successfully",
+          data: carPro,
+        };
+      } catch (error) {
+        if (error.code == 121) {
+          return new CustomError(121, error);
+        }
+        return new CustomError(400, " bad Request");
+      }
+    });
+  }
+
+  async deleteCartItems(userId, productId) {
+    return dbConnection.connectDB(async (database) => {
+      try {
+        await database.collection("carts").updateOne(
+          { userId },
+          {
+            $pull: {
+              cartItems: {
+                productId: new ObjectId(productId),
+              },
             },
           }
         );
-        console.log(cartItems);
-        res.json({ cartItems });
+        return {
+          statusCode: 200,
+          message: "Product Deleted From Favorite List successfully",
+        };
       } catch (error) {
-        // if (error.code==121)
-        console.log(error);
-        res.json(error);
+        return new CustomError(400, error);
       }
-    };
-    dbConnection.connectDB(addCb);
-  }
-  async deleteCartItems(req, res) {
-    const addCb = async (database) => {
-      const cartItems = await database
-        .collection("carts")
-        .deleteOne({ _id: new ObjectId("645fd14733e22e01d97065d7") });
-      res.json({ cartItems });
-      if (cartItems.deletedCount === 1) {
-        console.log("Successfully deleted one document.");
-      } else {
-        console.log("No documents matched the query. Deleted 0 documents.");
-      }
-    };
-    dbConnection.connectDB(addCb);
+    });
   }
 }
 
