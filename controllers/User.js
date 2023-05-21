@@ -45,10 +45,14 @@ class User {
         const { name, email, password } = req.body;
 
         const existingUser = await database.collection("users").findOne({
-          name,
+          $or: [{ name }, { email }],
         });
         if (existingUser) {
-          throw new Error("Username is already taken");
+          if (existingUser.name === name) {
+            throw new Error("Username is already taken");
+          } else if (existingUser.email === email) {
+            throw new Error("Username is already used");
+          }
         }
         const hashedPassword = await bcrypt.hash(password, 10);
         const user = {
