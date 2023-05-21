@@ -1,17 +1,10 @@
-const dbConnection = require("../db");
+
 const CustomError = require("../helpers/CustomError");
 const productModel = require("../models/Product");
-const { productSchema } = require("../validations/collectionSchemes");
 class Product {
-  constructor() {
-    dbConnection.connectDB(this.#addProductSchema);
-  }
-  async #addProductSchema(database) {
-    await database.command(productSchema);
-  }
+
   async addProduct(req, res, next) {
     const { name, description, stock, price, size, images } = req.body;
-
     productModel
       .addProduct(
         { name, description, stock, price, size, images },
@@ -25,43 +18,36 @@ class Product {
       });
   }
 
-  async updateProduct(req, res) {
+  async updateProduct(req, res, next) {
     const { _id, name, description } = req.body;
-    const addCb = async (database) => {
-      try {
-        const productItem = await database.collection("products").updateOne(
-          { _id },
-          {
-            $set: {
-              name,
-              description,
-            },
-          }
-        );
-        res.json({ productItem });
-      } catch (error) {
-        // if (error.code==121)
-        console.log(error);
-        res.json(error);
-      }
-    };
-    dbConnection.connectDB(addCb);
+    productModel
+      .updateProduct({ _id, name, description })
+      .then((data) => {
+        res.json(data);
+      })
+      .catch((error) => {
+        next(new CustomError(500, error.message && "Internal Server Error"));
+      });
   }
-  async getProducts(req, res) {
-    const addCb = async (database) => {
-      try {
-        const productItem = await database
-          .collection("products")
-          .find({})
-          .toArray();
-        res.json({ productItem });
-      } catch (error) {
-        // if (error.code==121)
-        console.log(error);
-        res.json(error);
-      }
-    };
-    dbConnection.connectDB(addCb);
+  async getProducts(req, res, next) {
+    productModel
+      .getProducts()
+      .then((data) => {
+        res.json(data);
+      })
+      .catch((error) => {
+        next(new CustomError(500, error.message && "Internal Server Error"));
+      });
+  }
+  async getByNameProducts(req, res, next) {
+    productModel
+      .getByNameProducts(req.query.name)
+      .then((data) => {
+        res.send(data);
+      })
+      .catch((error) => {
+        next(new CustomError(500, error.message && "Internal Server Error"));
+      });
   }
 }
 

@@ -1,6 +1,8 @@
 const { ObjectId } = require("mongodb");
 const dbConnection = require("../db");
 const { cartSchema } = require("../validations/collectionSchemes");
+const cartModel = require("../models/Cart");
+const CustomError = require("../helpers/CustomError");
 class Cart {
   constructor() {
     dbConnection.connectDB(this.#addCartSchema);
@@ -8,20 +10,13 @@ class Cart {
   async #addCartSchema(database) {
     await database.command(cartSchema);
   }
-  async getCartItems(req, res) {
-    const addCb = async (database) => {
-      try {
-        const cartItems = await database.collection("carts").find({}).toArray();
-        console.log(cartItems);
-        res.json(cartItems);
-      } catch (err) {
-        res.status(500).json({
-          message: "Internal Server Error",
-          error: err.message,
-        });
-      }
-    };
-    dbConnection.connectDB(addCb);
+  async getCartItems(req, res, next) {
+    cartModel
+      .getCartItems(req.user._id)
+      .then((data) => res.json(data))
+      .catch((err) =>
+        next(new CustomError(500, err.message && "Internal Server Error"))
+      );
   }
   async addToCart(req, res) {
     const addCb = async (database) => {

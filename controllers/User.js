@@ -1,7 +1,6 @@
 const userModel = require("../models/User");
 const CustomError = require("../helpers/CustomError");
-const dbConnection = require("../db");
-const { ObjectId } = require("mongodb");
+
 
 class User {
   async signUp(req, res, next) {

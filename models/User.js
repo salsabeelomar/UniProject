@@ -96,7 +96,6 @@ class User {
           },
         };
       } catch (error) {
-        console.log(error, "sssssssssssssssssssssss");
         throw new CustomError(500, "Internal Server Error");
       }
     });

@@ -15,7 +15,6 @@ class Product {
           vendorId,
           ...productItem,
         });
-        console.log("newProduct", newProduct);
         return {
           statusCode: 201,
           data: {
@@ -23,22 +22,19 @@ class Product {
           },
         };
       } catch (error) {
-        console.log(
-          error.errInfo.details.schemaRulesNotSatisfied[0].missingProperties
-        );
         if (error.code === 121)
           return new CustomError(
             121,
             ` DB Error is missing ${error.errInfo.details.schemaRulesNotSatisfied[0].missingProperties}`
           );
-        //   return error.errInfo.details.schemaRulesNotSatisfied;
-        // throw new CustomError(500, " Internal Server Error");
+
+        throw new CustomError(500, " Internal Server Error");
       }
     });
   }
-  async updateProduct(req, res) {
-    const { _id, name, description } = req.body;
-    const addCb = async (database) => {
+  async updateProduct(editedProduct) {
+    const { _id, name, description } = editedProduct;
+    return dbConnection.connectDB(async (database) => {
       try {
         const productItem = await database.collection("products").updateOne(
           { _id },
@@ -49,30 +45,74 @@ class Product {
             },
           }
         );
-        res.json({ productItem });
+        return {
+          statusCode: 200,
+          data: {
+            product: productItem,
+          },
+        };
       } catch (error) {
-        // if (error.code==121)
-        console.log(error);
-        res.json(error);
+        if (error.code == 121)
+          return new CustomError(
+            121,
+            ` DB Error is missing ${error.errInfo.details.schemaRulesNotSatisfied[0].missingProperties}`
+          );
+        throw new CustomError(500, " Internal Server Error");
       }
-    };
-    dbConnection.connectDB(addCb);
+    });
   }
-  async getProducts(req, res) {
-    const addCb = async (database) => {
+  async getProducts() {
+    return dbConnection.connectDB(async (database) => {
       try {
         const productItem = await database
           .collection("products")
           .find({})
           .toArray();
-        res.json({ productItem });
+        return {
+          statusCode: 200,
+          data: {
+            product: productItem,
+          },
+        };
       } catch (error) {
-        // if (error.code==121)
-        console.log(error);
-        res.json(error);
+        throw new CustomError(400, "bad Request ");
       }
-    };
-    dbConnection.connectDB(addCb);
+    });
+  }
+  async getByNameProducts(name) {
+    return dbConnection.connectDB(async (database) => {
+      try {
+        const productItem = await database
+          .collection("products")
+          .find({ name: new RegExp(name, "i") })
+          .toArray();
+        return {
+          statusCode: 200,
+          data: {
+            product: productItem,
+          },
+        };
+      } catch (error) {
+        if (error.code == 121)
+          return new CustomError(
+            121,
+            ` DB Error is missing ${error.errInfo.details.schemaRulesNotSatisfied[0].missingProperties}`
+          );
+        throw new CustomError(404, "No Result ");
+      }
+    });
+  }
+  async getProductById(productId) {
+    return dbConnection.connectDB(async (database) => {
+      try {
+        const productItem = await database
+          .collection("products")
+          .findOne({ _id: productId });
+        return productItem;
+      } catch (error) {
+        throw new CustomError(400, "bad Request ");
+      }
+    });
   }
 }
 
